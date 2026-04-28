@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+.venv/
+venv/
+env/
+
+# Jupyter / Colab
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Models & Datasets (too large for GitHub)
+*.tflite
+*.h5
+*.keras
+*.pb
+/dataset/
+/mrl_dataset/
+/checkpoints/
+
+# Alarm sound (user provided)
+alarm.wav
+
+# VS Code
+.vscode/
+
+# Flutter (Phase 4)
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+build/
+*.apk
+*.aab
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
