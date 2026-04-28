@@ -129,11 +129,10 @@ Press **Q** to quit the webcam window.
 Phase 2 involves training a custom CNN on the **MRL Eye Dataset (48,000 labeled images)** on Google Colab with T4 GPU, then converting to TFLite for mobile deployment. More updates coming soon.
 
 ---
-
 ## 👨‍💻 Author
 
-**Parth Kunkunkar**
-[Linkedin](https://www.linkedin.com/in/parthkunkunkar/)
+**Parth Kunkunkar**  
+🔗 [LinkedIn](https://www.linkedin.com/in/parthkunkunkar/)
 
 ---
 
