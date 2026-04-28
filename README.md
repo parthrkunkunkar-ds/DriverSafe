@@ -133,7 +133,7 @@ Phase 2 involves training a custom CNN on the **MRL Eye Dataset (48,000 labeled 
 ## 👨‍💻 Author
 
 **Parth Kunkunkar**
-[Linkedin](www.linkedin.com/in/parthkunkunkar)
+[Linkedin](https://www.linkedin.com/in/parthkunkunkar/)
 
 ---
 
