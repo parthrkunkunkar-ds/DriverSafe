@@ -2,9 +2,9 @@
 
 ![Python](https://img.shields.io/badge/Python-3.10-blue?logo=python)
 ![MediaPipe](https://img.shields.io/badge/MediaPipe-0.10.14-green)
-![OpenCV](https://img.shields.io/badge/OpenCV-4.13-red)
-![TensorFlow](https://img.shields.io/badge/TensorFlow-2.19-orange?logo=tensorflow)
-![Status](https://img.shields.io/badge/Status-Phase%202%20Complete-brightgreen)
+![OpenCV](https://img.shields.io/badge/OpenCV-4.10-red)
+![TensorFlow](https://img.shields.io/badge/TensorFlow-2.15-orange?logo=tensorflow)
+![Status](https://img.shields.io/badge/Status-Phase%203%20Complete-brightgreen)
 ![Platform](https://img.shields.io/badge/Platform-Android-lightgrey?logo=android)
 
 > A real-time driver drowsiness detection system built for gig economy drivers — Uber, Ola, Rapido — who drive long shifts with zero safety net. Runs **100% offline**. No internet required.
@@ -23,8 +23,8 @@ Thousands of road accidents every year are caused by driver fatigue. Gig economy
 |-------|-------------|--------|
 | **Phase 1** | MediaPipe + EAR algorithm — laptop webcam prototype | ✅ Complete |
 | **Phase 2** | Custom CNN training on MRL Eye Dataset (48,000 images) via Google Colab | ✅ Complete |
-| **Phase 3** | MediaPipe + CNN ensemble for maximum accuracy | 🔄 In Progress |
-| **Phase 4** | Flutter Android app with TFLite — Play Store deployment | ⏳ Upcoming |
+| **Phase 3** | MediaPipe + CNN ensemble — dual verification system | ✅ Complete |
+| **Phase 4** | Flutter Android app with TFLite — Play Store deployment | 🔄 In Progress |
 
 ---
 
@@ -33,12 +33,13 @@ Thousands of road accidents every year are caused by driver fatigue. Gig economy
 ```
 DriverSafe/
 ├── phase1/
-│   └── drivesafe_phase1.py       # MediaPipe EAR based detection
+│   ├── drivesafe_phase1.py       # MediaPipe EAR based detection
+│   └── drivesafe_phase3.py       # EAR + CNN ensemble system
 ├── phase2/
 │   └── DriveSafe_Phase2.ipynb    # CNN training notebook (Google Colab)
 ├── models/
 │   └── drivesafe_float16.tflite  # Trained model — TFLite export (513 KB)
-├── requirements.txt              # Phase 1 dependencies
+├── requirements.txt              # Dependencies
 └── README.md
 ```
 
@@ -99,14 +100,49 @@ Phase 2 trains a custom Convolutional Neural Network on the **MRL Eye Dataset** 
 
 ### Training Setup
 - Platform: Google Colab (T4 GPU)
-- Framework: TensorFlow 2.19
+- Framework: TensorFlow 2.15
 - Epochs: 30
 - Batch size: 64
 - Best epoch: 25
 
 ---
 
-## 🛠️ Phase 1 Setup
+## 🔗 Phase 3 — EAR + CNN Ensemble
+
+Phase 3 combines both detection systems into a single real-time pipeline running at **30 FPS**.
+
+```
+Webcam Frame
+      ↓
+MediaPipe Face Mesh
+      ↓
+Extract Eye Region
+   ↙        ↘
+EAR          CNN Model (TFLite)
+Algorithm    513KB on-device
+   ↓               ↓
+EAR < 0.25?   CNN < threshold?
+   ↘        ↙
+  Either triggers?
+       ↓
+  Alarm + Warning
+```
+
+### Why Ensemble?
+- **EAR alone** — fast but sensitive to lighting and head angle
+- **CNN alone** — accurate but can miss partial closures
+- **Combined** — EAR catches geometric closure, CNN catches subtle drooping. Together they eliminate false positives significantly.
+
+### Live Overlay
+- `EAR: 0.291` — real-time eye aspect ratio
+- `CNN: 0.998` — real-time CNN confidence (1.0 = open, 0.0 = closed)
+- `Mode: Eyes Open / EAR only / CNN only / BOTH CLOSED`
+- Drowsy meter bar — fills up over 2 seconds before alarm fires
+- **30 FPS** on standard laptop CPU
+
+---
+
+## 🛠️ Setup & Run
 
 ### Prerequisites
 - Python 3.10
@@ -125,18 +161,20 @@ py -3.10 -m venv .venv
 # source .venv/bin/activate   # Mac/Linux
 
 # Install dependencies
-pip install -r requirements.txt
+pip install opencv-python==4.10.0.84 mediapipe==0.10.14 numpy==1.26.4 pygame==2.6.1 tensorflow-cpu==2.15.0 protobuf==4.25.9
 ```
 
-### Run
-
+### Run Phase 1 (EAR only)
 ```bash
 python phase1/drivesafe_phase1.py
 ```
 
-Press **Q** to quit the webcam window.
+### Run Phase 3 (EAR + CNN ensemble)
+```bash
+python phase1/drivesafe_phase3.py
+```
 
-> **Note:** Optionally place an `alarm.wav` file in the `phase1/` folder for a custom alarm sound. If absent, a 440Hz beep is auto-generated.
+Press **Q** to quit.
 
 ---
 
@@ -146,29 +184,30 @@ Press **Q** to quit the webcam window.
 |------|---------|
 | Python 3.10 | Core language |
 | MediaPipe 0.10.14 | Face mesh + landmark detection |
-| OpenCV | Webcam capture + frame processing |
-| NumPy | EAR math calculations |
+| OpenCV 4.10 | Webcam capture + frame processing |
+| NumPy 1.26 | EAR math calculations |
 | Pygame | Audio alarm |
-| TensorFlow 2.19 | CNN model training |
-| TFLite | On-device mobile inference |
+| TensorFlow CPU 2.15 | TFLite inference |
+| TFLite float16 | On-device model (513 KB) |
 | Flutter *(Phase 4)* | Android app |
 
 ---
 
-## 📊 Achieved vs Target Accuracy
+## 📊 Achieved vs Target
 
 | Metric | Target | Achieved |
 |--------|--------|----------|
-| Accuracy | > 95% | **99.71%** ✅ |
+| CNN Accuracy | > 95% | **99.71%** ✅ |
 | AUC | > 0.98 | **0.9999** ✅ |
-| Inference speed | Real-time (24+ fps) | ✅ |
-| Internet required | None | ✅ |
+| Inference speed | 24+ fps | **30 FPS** ✅ |
+| Internet required | None | **None** ✅ |
+| Model size | < 1MB | **513 KB** ✅ |
 
 ---
 
 ## 🔭 What's Coming Next
 
-Phase 3 combines the **MediaPipe EAR algorithm + trained CNN model** into a single ensemble system for maximum accuracy. Both methods must agree on drowsiness before the alarm fires — reducing false positives significantly. After that, Phase 4 brings everything to Android via Flutter.
+Phase 4 brings everything to Android via **Flutter + TFLite**. The same ensemble logic — MediaPipe face detection + CNN eye classification — will run entirely on the phone's front camera, with vibration + loud alarm on drowsiness detection. Target: Play Store deployment.
 
 ---
 
