@@ -3,7 +3,8 @@
 ![Python](https://img.shields.io/badge/Python-3.10-blue?logo=python)
 ![MediaPipe](https://img.shields.io/badge/MediaPipe-0.10.14-green)
 ![OpenCV](https://img.shields.io/badge/OpenCV-4.13-red)
-![Status](https://img.shields.io/badge/Status-Phase%201%20Complete-brightgreen)
+![TensorFlow](https://img.shields.io/badge/TensorFlow-2.19-orange?logo=tensorflow)
+![Status](https://img.shields.io/badge/Status-Phase%202%20Complete-brightgreen)
 ![Platform](https://img.shields.io/badge/Platform-Android-lightgrey?logo=android)
 
 > A real-time driver drowsiness detection system built for gig economy drivers — Uber, Ola, Rapido — who drive long shifts with zero safety net. Runs **100% offline**. No internet required.
@@ -21,8 +22,8 @@ Thousands of road accidents every year are caused by driver fatigue. Gig economy
 | Phase | Description | Status |
 |-------|-------------|--------|
 | **Phase 1** | MediaPipe + EAR algorithm — laptop webcam prototype | ✅ Complete |
-| **Phase 2** | Custom CNN training on MRL Eye Dataset (48,000 images) via Google Colab | 🔄 In Progress |
-| **Phase 3** | MediaPipe + CNN ensemble for maximum accuracy | ⏳ Upcoming |
+| **Phase 2** | Custom CNN training on MRL Eye Dataset (48,000 images) via Google Colab | ✅ Complete |
+| **Phase 3** | MediaPipe + CNN ensemble for maximum accuracy | 🔄 In Progress |
 | **Phase 4** | Flutter Android app with TFLite — Play Store deployment | ⏳ Upcoming |
 
 ---
@@ -32,14 +33,18 @@ Thousands of road accidents every year are caused by driver fatigue. Gig economy
 ```
 DriverSafe/
 ├── phase1/
-│   └── drivesafe_phase1.py      # MediaPipe EAR based detection
+│   └── drivesafe_phase1.py       # MediaPipe EAR based detection
+├── phase2/
+│   └── DriveSafe_Phase2.ipynb    # CNN training notebook (Google Colab)
+├── models/
+│   └── drivesafe_float16.tflite  # Trained model — TFLite export (513 KB)
 ├── requirements.txt              # Phase 1 dependencies
 └── README.md
 ```
 
 ---
 
-## ⚙️ Phase 1 — How It Works
+## ⚙️ Phase 1 — MediaPipe EAR Detection
 
 Phase 1 runs entirely on a laptop webcam using **MediaPipe Face Mesh** and the **Eye Aspect Ratio (EAR)** algorithm.
 
@@ -61,6 +66,43 @@ EAR = (‖p2−p6‖ + ‖p3−p5‖) / (2 × ‖p1−p4‖)
 - 🔔 Loud audio alarm triggers instantly
 - 🚨 Full-screen **"DROWSY! PULL OVER!"** warning appears
 - System resets automatically once eyes reopen
+
+---
+
+## 🧠 Phase 2 — Custom CNN Model
+
+Phase 2 trains a custom Convolutional Neural Network on the **MRL Eye Dataset** using Google Colab's T4 GPU, then exports to TFLite for mobile deployment.
+
+### Dataset
+| Property | Value |
+|----------|-------|
+| Dataset | MRL Eye Dataset |
+| Total images | 48,000 |
+| Classes | `open_eye` / `closed_eye` |
+| Class balance | Perfectly balanced (24k each) |
+
+### Model Architecture
+- 4 Conv2D blocks with BatchNormalization + MaxPooling
+- GlobalAveragePooling2D
+- Dense(128) + Dropout(0.4)
+- Sigmoid output
+- Total parameters: **258,881** (~1MB)
+
+### Results
+
+| Metric | Result |
+|--------|--------|
+| Test Accuracy | **99.71%** |
+| Test AUC | **0.9999** |
+| Test Loss | **0.0103** |
+| Model size (TFLite float16) | **513 KB** |
+
+### Training Setup
+- Platform: Google Colab (T4 GPU)
+- Framework: TensorFlow 2.19
+- Epochs: 30
+- Batch size: 64
+- Best epoch: 25
 
 ---
 
@@ -107,31 +149,32 @@ Press **Q** to quit the webcam window.
 | OpenCV | Webcam capture + frame processing |
 | NumPy | EAR math calculations |
 | Pygame | Audio alarm |
-| TensorFlow *(Phase 2+)* | CNN model training |
-| TFLite *(Phase 4)* | On-device mobile inference |
+| TensorFlow 2.19 | CNN model training |
+| TFLite | On-device mobile inference |
 | Flutter *(Phase 4)* | Android app |
 
 ---
 
-## 📊 Target Accuracy
+## 📊 Achieved vs Target Accuracy
 
-| Metric | Target |
-|--------|--------|
-| Accuracy | > 95% |
-| AUC | > 0.98 |
-| Inference speed | Real-time (24+ fps) |
-| Internet required | ❌ None |
+| Metric | Target | Achieved |
+|--------|--------|----------|
+| Accuracy | > 95% | **99.71%** ✅ |
+| AUC | > 0.98 | **0.9999** ✅ |
+| Inference speed | Real-time (24+ fps) | ✅ |
+| Internet required | None | ✅ |
 
 ---
 
 ## 🔭 What's Coming Next
 
-Phase 2 involves training a custom CNN on the **MRL Eye Dataset (48,000 labeled images)** on Google Colab with T4 GPU, then converting to TFLite for mobile deployment. More updates coming soon.
+Phase 3 combines the **MediaPipe EAR algorithm + trained CNN model** into a single ensemble system for maximum accuracy. Both methods must agree on drowsiness before the alarm fires — reducing false positives significantly. After that, Phase 4 brings everything to Android via Flutter.
 
 ---
+
 ## 👨‍💻 Author
 
-**Parth Kunkunkar**  
+**Parth Kunkunkar**
 🔗 [LinkedIn](https://www.linkedin.com/in/parthkunkunkar/)
 
 ---
