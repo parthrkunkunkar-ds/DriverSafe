@@ -141,8 +141,7 @@ EAR alone can false-trigger on blinking. The CNN validates actual eye state. Eit
 | **Phase 3** | EAR + CNN ensemble (Python) | ✅ |
 | **Phase 4A** | Flutter UI + all screens | ✅ |
 | **Phase 4B** | ML Kit + CNN integration, alerts, analytics | ✅ |
-| **Phase 4C** | Background monitoring + session auto-save | ⏳ |
-| **Phase 4D** | Play Store deployment | ⏳ |
+| **Phase 4C** | Play Store deployment | ⏳ |
 
 > **Note:** Google Maps integration was intentionally scoped out for v1 to keep the app 100% offline and zero-cost. Location-based drive time tracking is planned for a future production version.
 
