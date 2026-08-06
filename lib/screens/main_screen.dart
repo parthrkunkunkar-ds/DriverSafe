@@ -1,3 +1,6 @@
+/*
+ * Main Screen
+ */
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'home_screen.dart';
@@ -13,11 +16,12 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int _currentIndex = 0;
   bool _alertActive = false;
   double _earSensitivity = 0.20;
   bool _alertSound = true;
   bool _vibration = true;
+  int _analyticsKey = 0;
+  int _currentIndex = 0;
 
   @override
   void initState() {
@@ -52,6 +56,7 @@ class _MainScreenState extends State<MainScreen> {
     final screens = [
       HomeScreen(
         onDrowsinessDetected: _triggerAlert,
+        onSessionSaved: () => setState(() => _analyticsKey++),
         earThreshold: _earSensitivity,
       ),
       AlertScreen(
@@ -60,7 +65,7 @@ class _MainScreenState extends State<MainScreen> {
         soundEnabled: _alertSound,
         vibrationEnabled: _vibration,
       ),
-      const AnalyticsScreen(),
+      AnalyticsScreen(key: ValueKey(_analyticsKey)),
       SettingsScreen(onSettingsChanged: _loadSettings),
     ];
 

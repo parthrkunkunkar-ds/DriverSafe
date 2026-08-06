@@ -1,3 +1,6 @@
+/*
+ * Home Screen
+ */
 import 'dart:async';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
@@ -7,11 +10,18 @@ import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 import '../theme.dart';
 import '../services/detection_service.dart';
 import '../services/cnn_service.dart';
+import '../services/analytics_service.dart';
 
 class HomeScreen extends StatefulWidget {
   final VoidCallback? onDrowsinessDetected;
+  final VoidCallback? onSessionSaved;
   final double earThreshold;
-  const HomeScreen({super.key, this.onDrowsinessDetected, this.earThreshold = 0.20});
+  const HomeScreen({
+    super.key,
+    this.onDrowsinessDetected,
+    this.onSessionSaved,
+    this.earThreshold = 0.20,
+  });
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -31,12 +41,17 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _faceDetected = false;
   int _drowsyFrameCount = 0;
   int _noFaceFrameCount = 0;
-  static const int _drowsyFrameThreshold = 36;
+  static const int _drowsyFrameThreshold = 20;
   static const int _noFaceFrameThreshold = 20;
   double get _earThreshold => widget.earThreshold;
 
   int _frameCount = 0;
   DateTime _lastFpsTime = DateTime.now();
+
+  DateTime? _sessionStart;
+  int _sessionAlerts = 0;
+  double _earSum = 0.0;
+  int _earCount = 0;
 
   Future<void> _startMonitoring() async {
     final cameras = await availableCameras();
@@ -62,6 +77,10 @@ class _HomeScreenState extends State<HomeScreen> {
         _noFaceFrameCount = 0;
         _frameCount = 0;
         _lastFpsTime = DateTime.now();
+        _sessionStart = DateTime.now();
+        _sessionAlerts = 0;
+        _earSum = 0.0;
+        _earCount = 0;
       });
     }
   }
@@ -125,6 +144,8 @@ class _HomeScreenState extends State<HomeScreen> {
         _cnnScore = _cnnService.lastScore;
         if (result.ear > 0) {
           _earValue = result.ear;
+          _earSum += result.ear;
+          _earCount++;
           if (_earValue < _earThreshold) {
             _drowsyFrameCount++;
           } else {
@@ -152,10 +173,37 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _triggerAlert() {
-  widget.onDrowsinessDetected?.call();
-}
+    _sessionAlerts++;
+    AnalyticsService.recordAlarmEvent();
+    widget.onDrowsinessDetected?.call();
+  }
 
-  void _stopMonitoring() {
+  Future<void> _saveSession() async {
+    if (_sessionStart == null) return;
+
+    final duration = DateTime.now().difference(_sessionStart!).inSeconds;
+    final avgEar = _earCount > 0 ? _earSum / _earCount : 0.0;
+
+    final now = DateTime.now();
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+    final date = '${months[now.month - 1]} ${now.day}, ${now.year}';
+
+    await AnalyticsService.saveSession(DriveSession(
+      date: date,
+      durationSeconds: duration,
+      alerts: _sessionAlerts,
+      avgEar: double.parse(avgEar.toStringAsFixed(2)),
+    ));
+
+    _sessionStart = null;
+    widget.onSessionSaved?.call();
+  }
+
+  void _stopMonitoring() async {
+    await _saveSession();
     _cameraController?.stopImageStream();
     _cameraController?.dispose();
     _cameraController = null;
@@ -235,9 +283,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ],
               ),
-
               const SizedBox(height: 20),
-
               Container(
                 width: double.infinity,
                 decoration: BoxDecoration(
@@ -425,10 +471,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
               ),
-
               const SizedBox(height: 16),
-
-              // EAR + CNN card
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -445,7 +488,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // EAR row
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -510,8 +552,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                       ],
                     ),
-
-                    // CNN collapsible section
                     if (_isMonitoring && _faceDetected && _cnnScore >= 0) ...[
                       Divider(color: AppColors.divider(context), height: 24),
                       GestureDetector(
@@ -612,9 +652,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
               ),
-
               const SizedBox(height: 16),
-
               SizedBox(
                 width: double.infinity,
                 height: 56,
@@ -652,9 +690,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
               ),
-
               const SizedBox(height: 12),
-
               Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
@@ -679,7 +715,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
               ),
-
               const SizedBox(height: 16),
             ],
           ),

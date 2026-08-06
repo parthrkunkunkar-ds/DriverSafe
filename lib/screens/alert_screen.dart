@@ -1,3 +1,8 @@
+/*
+ * Alert Screen
+ * Displays an alert when drowsiness is detected, with options for sound and vibration.
+ * Also shows nearby rest stops for the driver to pull over safely.
+ */
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:vibration/vibration.dart';
