@@ -165,11 +165,11 @@ flutter run
 
 ## 🎓 What I Learned
 
-- **On-device ML:** Converting a 99.7% accuracy CNN to a 513 KB TFLite model that runs in a Flutter isolate
-- **Real-time CV:** Bridging NV21 camera frames to ML Kit and custom contour math
-- **State management:** Coordinating camera lifecycle, alert navigation, and analytics persistence without external state libraries
-- **Performance:** Maintaining 24–30 FPS while running dual inference pipelines
-- **Product thinking:** Building for users with low-end devices and zero internet
+- **On-device ML:** Converting a 99.7% accuracy CNN to a 513 KB TFLite model that runs in a Flutter isolate.
+- **Real-time CV:** Bridging NV21 camera frames to ML Kit and custom contour math.
+- **State management:** Coordinating camera lifecycle, alert navigation, and analytics persistence without external state libraries.
+- **Performance:** Maintaining 24–30 FPS while running dual inference pipelines.
+- **Product thinking:** Building for users with low-end devices and zero internet.
 
 ---
 
